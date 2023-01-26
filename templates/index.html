@@ -5,9 +5,16 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="./static/index.css">
 </head>
 <body>
     <h1>parsed from red</h1>
+    <form method="post">
+        <textarea name="comment" id="" cols="30" rows="10"></textarea>
+        <div>
+            <button type="submit">Post comment</button>
+        </div>
+    </form>
     {{range .}}
     <div>{{.}}</div>
     {{end}}
