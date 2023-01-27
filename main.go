@@ -16,14 +16,16 @@ var store = sessions.NewCookieStore([]byte("t0p-s3cr3t"))
 var client *redis.Client
 
 func main() {
+	//redis connection
 	client = redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
+
 	templates = template.Must(template.ParseGlob("templates/*.html"))
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", indexhandler).Methods("GET")
-	r.HandleFunc("/", indexPostHandler).Methods("POST")
+	r.HandleFunc("/", AuthRequired(indexhandler)).Methods("GET")
+	r.HandleFunc("/", AuthRequired(indexPostHandler)).Methods("POST")
 	r.HandleFunc("/login", loginHandler).Methods("GET")
 	r.HandleFunc("/login", loginPostHandler).Methods("POST")
 	r.HandleFunc("/register", registerHandler).Methods("GET")
@@ -35,14 +37,21 @@ func main() {
 	http.ListenAndServe(":2500", nil)
 }
 
-func indexhandler(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
-	_, ok := session.Values["username"]
+func AuthRequired(handler http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, _ := store.Get(r, "session-name")
+		_, ok := session.Values["username"]
 
-	if !ok {
-		http.Redirect(w, r, "/login", 302)
-		return
+		if !ok {
+			http.Redirect(w, r, "/login", 302)
+			return
+		}
+		handler.ServeHTTP(w, r)
 	}
+}
+
+func indexhandler(w http.ResponseWriter, r *http.Request) {
+
 	comments, err := client.LRange("comments", 0, 10).Result()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -79,7 +88,7 @@ func loginPostHandler(w http.ResponseWriter, r *http.Request) {
 	if err == redis.Nil {
 		templates.ExecuteTemplate(w, "login.html", "Unknown User")
 		return
-	}else if err != nil {
+	} else if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
@@ -118,9 +127,9 @@ func registerPostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//saved username to redis
-	err = client.Set("user:" + username, hash, 0).Err()
+	err = client.Set("user:"+username, hash, 0).Err()
 
-	if err != nil{
+	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
