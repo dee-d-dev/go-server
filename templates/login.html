@@ -7,6 +7,9 @@
     <title>Login</title>
   </head>
   <body>
+    {{if .}}
+      <div class="error">{{.}}</div>
+    {{end}}
     <form action="" method="post">
       Name:<input type="text" name="username" />
       <div><input type="text" name="password"></div>
