@@ -9,21 +9,35 @@ import (
 
 func Indexhandler(w http.ResponseWriter, r *http.Request) {
 
-	comments, err := models.GetComments()
+	updates, err := models.GetUpdates()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 
-	utils.ExecuteTemplate(w, "index.html", comments)
+	utils.ExecuteTemplate(w, "index.html", updates)
 
 }
 
 func IndexPostHandler(w http.ResponseWriter, r *http.Request) {
+
+	session, _ := sessions.Store.Get(r, "session-name")
+	untypedUserId := session.Values["user_id"]
+	userId, ok := untypedUserId.(int64)
+
+	if !ok {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
 	r.ParseForm()
-	comment := r.PostForm.Get("comment")
-	err := models.PostComment(comment)
+
+	body := r.PostForm.Get("update")
+	err := models.PostUpdate(userId, body)
+
+
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -41,7 +55,7 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 	username := r.PostForm.Get("username")
 	password := r.PostForm.Get("password")
-	err := models.AuthenticateUser(username, password)
+	user, err := models.AuthenticateUser(username, password)
 
 	if err != nil {
 		switch err {
@@ -56,8 +70,16 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userId, err := user.GetId()
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
 	session, _ := sessions.Store.Get(r, "session-name")
-	session.Values["username"] = username
+	session.Values["user_id"] = userId
 	session.Save(r, w)
 	http.Redirect(w, r, "/", 302)
 }

@@ -10,13 +10,14 @@
 <body>
     <h1>parsed from red</h1>
     <form method="post">
-        <textarea name="comment" id="" cols="30" rows="10"></textarea>
+        <textarea name="update" id="" cols="30" rows="10"></textarea>
         <div>
-            <button type="submit">Post comment</button>
+            <button type="submit">Post update</button>
         </div>
     </form>
     {{range .}}
-    <div>{{.}}</div>
+    <strong>{{.GetUser.GetUsername}} wrote:</strong>
+    <div>{{.Body}}</div>
     {{end}}
 </body>
 </html>

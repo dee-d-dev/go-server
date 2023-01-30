@@ -10,7 +10,7 @@ import (
 
 var (
 	ErrNotFound     = errors.New("user not found")
-	ErrInvalidLogin = errors.New("Invalid login")
+	ErrInvalidLogin = errors.New("invalid login")
 )
 
 type User struct {
@@ -40,6 +40,10 @@ func NewUser(username string, hash []byte) (*User, error) {
 	return &User{key}, nil
 }
 
+func (user *User) GetId() (int64, error) {
+	return client.HGet(user.key, "id").Int64()
+}
+
 func (user *User) GetUsername() (string, error) {
 	return client.HGet(user.key, "username").Result()
 }
@@ -64,6 +68,11 @@ func (user *User) Authenticate(password string) error {
 	return err
 }
 
+func GetUserById(id int64) (*User, error) {
+	key := fmt.Sprintf("user:%d", id)
+	return &User{key}, nil
+}
+
 func GetUserByUsername(username string) (*User, error) {
 	id, err := client.HGet("user:by-username", username).Int64()
 	if err == redis.Nil {
@@ -72,8 +81,7 @@ func GetUserByUsername(username string) (*User, error) {
 		return nil, err
 	}
 
-	key := fmt.Sprintf("user:%d", id)
-	return &User{key}, nil
+	return GetUserById(id)
 }
 
 func RegisterUser(username, password string) error {
@@ -88,12 +96,12 @@ func RegisterUser(username, password string) error {
 	return err
 }
 
-func AuthenticateUser(username, password string) error {
+func AuthenticateUser(username, password string) (*User, error) {
 
 	user, err := GetUserByUsername(username)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return user.Authenticate(password)
+	return user, user.Authenticate(password)
 }
