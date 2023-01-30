@@ -60,7 +60,7 @@ func GetAllUpdates() ([]*Update, error) {
 
 func GetUpdates(userId int64) ([]*Update, error) {
 	key:= fmt.Sprintf("user:%d:updates",userId)
-	
+	 
 	updateIds, err := client.LRange(key, 0, 10).Result()
 	if err != nil {
 		return nil, err

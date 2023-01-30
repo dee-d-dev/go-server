@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dee-d-dev/go-server/models"
 	"github.com/dee-d-dev/go-server/sessions"
 	"github.com/dee-d-dev/go-server/utils"
+	"github.com/gorilla/mux"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,13 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.ExecuteTemplate(w, "index.html", updates)
+	utils.ExecuteTemplate(w, "index.html", struct {
+		Title string
+		Updates []*models.Update
+	}{
+		Title: "All updates",
+		Updates: updates,
+	})
 
 }
 
@@ -48,15 +54,35 @@ func IndexPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func UserGetHandler(w http.ResponseWriter, r *http.Request) {
-
-	updates, err := models.GetAllUpdates()
+	vars := mux.Vars(r)
+	username := vars["username"]
+	user, err := models.GetUserByUsername(username)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	userId, err := user.GetId()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+	updates, err := models.GetUpdates(userId)
+	
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 
-	utils.ExecuteTemplate(w, "index.html", updates)
+	utils.ExecuteTemplate(w, "index.html",struct {
+		Title string
+		Updates []*models.Update
+	}{
+		Title: username,
+		Updates: updates,
+	})
 
 }
 
@@ -95,7 +121,6 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["user_id"] = userId
 	session.Save(r, w)
 	http.Redirect(w, r, "/", 302)
-	fmt.Println("reached")
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

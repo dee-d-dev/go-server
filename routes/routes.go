@@ -17,6 +17,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/login", controllers.LoginPostHandler).Methods("POST")
 	r.HandleFunc("/register", controllers.RegisterHandler).Methods("GET")
 	r.HandleFunc("/register", controllers.RegisterPostHandler).Methods("POST")
+	r.HandleFunc("/{username}", controllers.UserGetHandler).Methods("GET")
 
 	fs := http.FileServer(http.Dir("./static/"))
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", fs))
