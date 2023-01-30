@@ -20,6 +20,7 @@ func NewUpdate(userId int64, body string) (*Update, error) {
 	pipe.HSet(key, "user_id", userId)
 	pipe.HSet(key, "body", body)
 	pipe.LPush("updates", id)
+	pipe.LPush(fmt.Sprintf("user:%d:updates", userId), id)
 	_, err = pipe.Exec()
 
 	if err != nil {
@@ -42,9 +43,9 @@ func (update *Update) GetUser() (*User, error) {
 	return GetUserById(userId)
 }
 
-func GetUpdates() ([]*Update, error) {
+func GetAllUpdates() ([]*Update, error) {
 	updateIds, err := client.LRange("updates", 0, 10).Result()
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
 	updates := make([]*Update, len(updateIds))
@@ -54,7 +55,24 @@ func GetUpdates() ([]*Update, error) {
 		updates[i] = &Update{key}
 	}
 
-	return updates, err
+	return updates, nil
+}
+
+func GetUpdates(userId int64) ([]*Update, error) {
+	key:= fmt.Sprintf("user:%d:updates",userId)
+	
+	updateIds, err := client.LRange(key, 0, 10).Result()
+	if err != nil {
+		return nil, err
+	}
+	updates := make([]*Update, len(updateIds))
+
+	for i, id := range updateIds {
+		key := "update:" + id
+		updates[i] = &Update{key}
+	}
+
+	return updates, nil
 }
 
 func PostUpdate(userId int64, body string) error {

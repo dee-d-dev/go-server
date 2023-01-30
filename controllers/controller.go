@@ -1,15 +1,17 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+
 	"github.com/dee-d-dev/go-server/models"
-	"github.com/dee-d-dev/go-server/utils"
 	"github.com/dee-d-dev/go-server/sessions"
+	"github.com/dee-d-dev/go-server/utils"
 )
 
-func Indexhandler(w http.ResponseWriter, r *http.Request) {
+func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
-	updates, err := models.GetUpdates()
+	updates, err := models.GetAllUpdates()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
@@ -37,14 +39,25 @@ func IndexPostHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.PostForm.Get("update")
 	err := models.PostUpdate(userId, body)
 
-
-
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Internal Server Error"))
 		return
 	}
 	http.Redirect(w, r, "/", 302)
+}
+
+func UserGetHandler(w http.ResponseWriter, r *http.Request) {
+
+	updates, err := models.GetAllUpdates()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Internal Server Error"))
+		return
+	}
+
+	utils.ExecuteTemplate(w, "index.html", updates)
+
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +95,7 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	session.Values["user_id"] = userId
 	session.Save(r, w)
 	http.Redirect(w, r, "/", 302)
+	fmt.Println("reached")
 }
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {

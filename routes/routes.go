@@ -11,7 +11,7 @@ import (
 func NewRouter() *mux.Router {
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", middlewares.AuthRequired(controllers.Indexhandler)).Methods("GET")
+	r.HandleFunc("/", middlewares.AuthRequired(controllers.IndexHandler)).Methods("GET")
 	r.HandleFunc("/", middlewares.AuthRequired(controllers.IndexPostHandler)).Methods("POST")
 	r.HandleFunc("/login", controllers.LoginHandler).Methods("GET")
 	r.HandleFunc("/login", controllers.LoginPostHandler).Methods("POST")

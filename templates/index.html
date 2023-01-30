@@ -1,23 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="./static/index.css">
-</head>
-<body>
-    <h1>parsed from red</h1>
+    <link rel="stylesheet" href="./static/index.css" />
+  </head>
+  <body>
     <form method="post">
-        <textarea name="update" id="" cols="30" rows="10"></textarea>
-        <div>
-            <button type="submit">Post update</button>
-        </div>
+      <textarea name="update" id="" cols="30" rows="10"></textarea>
+      <div>
+        <button type="submit">Post update</button>
+      </div>
     </form>
     {{range .}}
-    <strong>{{.GetUser.GetUsername}} wrote:</strong>
-    <div>{{.Body}}</div>
+    <div>
+      <div>
+        <strong>{{.GetUser.GetUsername}} wrote:</strong>
+      </div>
+
+      <div>{{.GetBody}}</div>
+    </div>
     {{end}}
-</body>
+  </body>
 </html>
