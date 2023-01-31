@@ -13,8 +13,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	updates, err := models.GetAllUpdates()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 
@@ -35,8 +34,7 @@ func IndexPostHandler(w http.ResponseWriter, r *http.Request) {
 	userId, ok := untypedUserId.(int64)
 
 	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 
@@ -46,8 +44,7 @@ func IndexPostHandler(w http.ResponseWriter, r *http.Request) {
 	err := models.PostUpdate(userId, body)
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 	http.Redirect(w, r, "/", 302)
@@ -58,21 +55,18 @@ func UserGetHandler(w http.ResponseWriter, r *http.Request) {
 	username := vars["username"]
 	user, err := models.GetUserByUsername(username)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 	userId, err := user.GetId()
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 	updates, err := models.GetUpdates(userId)
 	
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 
@@ -112,8 +106,7 @@ func LoginPostHandler(w http.ResponseWriter, r *http.Request) {
 	userId, err := user.GetId()
 
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		utils.InternalServerError(w)
 		return
 	}
 
@@ -137,8 +130,7 @@ func RegisterPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	//saved username to redis
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server error"))
+		utils.InternalServerError(w)
 		return
 	}
 	http.Redirect(w, r, "/login", 302)
